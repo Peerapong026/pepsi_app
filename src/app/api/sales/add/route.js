@@ -1,6 +1,5 @@
 // 📁 /app/api/sales/add/route.js
 import { connectMongDB } from "../../../../../lib/mongodb";
-import mongoose from "mongoose";
 import Sale from "../../../../../models/sale";
 import { NextResponse } from "next/server";
 
