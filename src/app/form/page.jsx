@@ -7,14 +7,6 @@ import Navbar from "../components/ui/navbar";
 
 const allMenuItems = [
   {
-    title: "สรุปงาน",
-    description: "ผลสรุปทั้งหมด",
-    icon: <ChartNoAxesCombined className="w-8 h-8 text-white" />,
-    color: "bg-sky-400",
-    href: "/form/summary",
-    roles: ["admin"] // 👈 เฉพาะ admin เท่านั้น
-  },
-  {
     title: "การใช้ FOC ของชิม",
     description: "จัดการการรับและใช้ของชิม FOC",
     icon: <Package className="w-8 h-8 text-white" />,
@@ -63,6 +55,14 @@ const allMenuItems = [
     roles: ["admin"] // 👈 เฉพาะ admin เท่านั้น
   },
   {
+    title: "สรุปงาน",
+    description: "ผลสรุปทั้งหมด",
+    icon: <ChartNoAxesCombined className="w-8 h-8 text-white" />,
+    color: "bg-rose-400",
+    href: "/form/summary",
+    roles: ["admin"] // 👈 เฉพาะ admin เท่านั้น
+  },
+  {
     title: "จัดการผู้ใช้",
     description: "นำเข้าข้อมูลผู้ใช้",
     icon: <UserCog className="w-8 h-8 text-white" />,
@@ -98,42 +98,40 @@ export default function FormMenu() {
   return (
     <>
       <Navbar />
-      <div className="pt-20 min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-6">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            ระบบเก็บข้อมูล
-          </h1>
-          <p className="text-gray-600">
-            จัดการข้อมูลการใช้ FOC, Premium, Performance และยอดขาย
-          </p>
-        </div>
+        <div className="pt-18 min-h-screen flex flex-col justify-center items-center bg-gradient-to-b from-blue-50 to-white px-4 py-12">
+          <div className="text-center mb-10">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">
+              ระบบเก็บข้อมูล
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600">
+              จัดการข้อมูลการใช้ FOC, Premium, Performance และยอดขาย
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {menuItems.map((item, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition duration-300"
-            >
-              <div
-                className={`w-14 h-14 flex items-center justify-center rounded-full mb-4 ${item.color}`}
-              >
-                {item.icon}
-              </div>
-              <h2 className="text-xl font-semibold text-gray-800">
-                {item.title}
-              </h2>
-              <p className="text-sm text-gray-600 mb-4">{item.description}</p>
-              <Link href={item.href}>
+          <div className="w-full max-w-6xl px-4 flex-grow">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+              {menuItems.map((item, index) => (
                 <div
-                  className={`mt-auto inline-block px-4 py-2 rounded-md text-white text-sm font-medium ${item.color} hover:opacity-90`}
+                  key={index}
+                  className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm hover:shadow-xl transition duration-300 flex flex-col items-center text-center"
                 >
-                  เข้าทำงาน
+                  <div className={`w-14 h-14 flex items-center justify-center rounded-full mb-4 ${item.color}`}>
+                    {item.icon}
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-800">{item.title}</h2>
+                  <p className="text-sm text-gray-600 mb-4">{item.description}</p>
+                  <Link href={item.href} className="mt-auto">
+                    <div
+                      className={`inline-block px-4 py-2 rounded-md text-white text-sm font-medium ${item.color} hover:opacity-90`}
+                    >
+                      เข้าทำงาน
+                    </div>
+                  </Link>
                 </div>
-              </Link>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
-      </div>
-    </>
+      </>
   );
 }

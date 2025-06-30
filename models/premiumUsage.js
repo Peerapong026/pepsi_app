@@ -3,8 +3,8 @@ import mongoose from "mongoose";
 
 const PremiumUsageSchema = new mongoose.Schema({
   gift_id: { type: String, unique: true },
-  gift_storeId: String,
-  gift_premiumId: String,
+  gift_storeId: { type: String, ref: "Store" },
+  gift_premiumId: { type: String, ref: "Premium" },
   gift_promotionId: String,
   gift_received: Number,
   gift_used: Number,

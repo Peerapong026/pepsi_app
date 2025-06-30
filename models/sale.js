@@ -3,9 +3,9 @@ import mongoose from "mongoose";
 
 const SaleItemSchema = new mongoose.Schema({
   sal_skuId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
-    trim: true,
+    ref: "Product",
   },
   sal_status: {
     type: String,
@@ -35,6 +35,7 @@ const SaleSchema = new mongoose.Schema({
   sal_storeId: {
     type: String,
     required: true,
+    ref: "Store" 
   },
   sal_date: {
     type: String,

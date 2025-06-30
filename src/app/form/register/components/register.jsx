@@ -4,11 +4,12 @@ import { useState,useEffect } from "react";
 import { useRouter } from "next/navigation"; // ✅ ใช้ใน Next.js
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
+import BackButton from "../../../components/ui/backbutton";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Checkbox } from "../../../components/ui/checkbox";
 import { useToast } from "../../../hooks/use-toast"; // ✅ ใช้ path ตรง
-import { ArrowLeft } from "lucide-react"; // ไอคอนย้อนกลับ
+
 
 
 export default function RegisterPage() {
@@ -83,13 +84,7 @@ export default function RegisterPage() {
   return (
     <div className="flex justify-center items-center min-h-screen bg-slate-100 px-4">
   <div className="absolute top-6 left-6">
-    <button
-      onClick={() => router.push("/form")}
-      className="flex items-center space-x-2 text-blue-600 hover:underline"
-    >
-      <ArrowLeft className="w-5 h-5" />
-      <span>ย้อนกลับ</span>
-    </button>
+    <BackButton to="/form" />
   </div>
       <Card className="w-full max-w-xl">
         <CardHeader>

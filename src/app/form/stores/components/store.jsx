@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
+import BackButton from "../../../components/ui/backbutton";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { ArrowLeft, Plus, Building2 } from "lucide-react";
@@ -74,14 +75,7 @@ useEffect(() => {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50">
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center mb-8">
-          <Button
-            variant="outline"
-            onClick={() => router.push("/form")}
-            className="mr-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            กลับ
-          </Button>
+            <BackButton to="/form" />
           <div className="flex items-center">
             <Building2 className="w-8 h-8 text-indigo-600 mr-3" />
             <div>

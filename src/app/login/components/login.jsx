@@ -10,10 +10,13 @@ import "react-toastify/dist/ReactToastify.css";
 export default function LoginPage() {
   const [user_id, setUserId] = useState("");
   const [user_password, setUserPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // 🔹 เพิ่ม state loading
   const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (isLoading) return; // 🔒 กันการกดซ้ำ
+    setIsLoading(true); // ⏳ เริ่มโหลด
 
     const res = await fetch("/api/login", {
       method: "POST",
@@ -27,10 +30,6 @@ export default function LoginPage() {
       toast.success("เข้าสู่ระบบสำเร็จ ✨", {
         position: "top-center",
         autoClose: 1800,
-        hideProgressBar: false,
-        pauseOnHover: false,
-        draggable: false,
-        theme: "colored",
       });
 
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -44,6 +43,7 @@ export default function LoginPage() {
         position: "top-center",
         autoClose: 2500,
       });
+      setIsLoading(false); // ❌ login fail → ให้ลองใหม่ได้
     }
   };
 
@@ -52,19 +52,18 @@ export default function LoginPage() {
       <ToastContainer />
       <form
         onSubmit={handleLogin}
-        className="bg-white p-8 sm:p-10 rounded-2xl shadow-xl w-full max-w-sm sm:max-w-md transition-all"
+        className="bg-white p-8 sm:p-10 rounded-2xl shadow-xl w-full max-w-sm sm:max-w-md"
       >
         <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">เข้าสู่ระบบ</h2>
 
         <div className="mb-4">
-          <label className="block mb-1 font-semibold text-gray-700">ชื่อผู้ใช้</label>
+          <label className="block mb-1 font-semibold text-gray-700">รหัสผู้ใช้</label>
           <Input
             type="text"
             placeholder="Username"
             value={user_id}
             onChange={(e) => setUserId(e.target.value)}
             required
-            className="rounded-md"
           />
         </div>
 
@@ -76,15 +75,17 @@ export default function LoginPage() {
             value={user_password}
             onChange={(e) => setUserPassword(e.target.value)}
             required
-            className="rounded-md"
           />
         </div>
 
         <Button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-lg rounded-md shadow-md transition"
+          disabled={isLoading} // 🔐 ปิดปุ่มตอนโหลด
+          className={`w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-lg rounded-md shadow-md transition ${
+            isLoading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
         >
-          เข้าสู่ระบบ
+          {isLoading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
         </Button>
       </form>
     </div>

@@ -3,6 +3,7 @@
 import { useState,useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
+import BackButton from "../../../components/ui/backbutton";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
@@ -15,6 +16,7 @@ const PremiumUsage = () => {
   const [storeList, setStoreList] = useState([]);
   const [premiumList, setPremiumList] = useState([]);
   const [records, setRecords] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     gift_storeId: "",
     gift_premiumId: "",
@@ -78,91 +80,91 @@ const PremiumUsage = () => {
 
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  const user = JSON.parse(localStorage.getItem("user"));
-  const received = parseFloat(formData.gift_received);
-  const used = parseFloat(formData.gift_used);
+    e.preventDefault();
+    setIsSubmitting(true);
+    const user = JSON.parse(localStorage.getItem("user"));
+    const received = parseFloat(formData.gift_received);
+    const used = parseFloat(formData.gift_used);
 
-  const previousRecords = records.filter(
-    (r) =>
-      r.gift_storeId === formData.gift_storeId &&
-      r.gift_premiumId === formData.gift_premiumId
-  );
+    const previousRecords = records.filter(
+      (r) =>
+        r.gift_storeId === formData.gift_storeId &&
+        r.gift_premiumId === formData.gift_premiumId
+    );
 
-  const totalPrevReceived = previousRecords.reduce((sum, r) => sum + r.gift_received, 0);
-  const totalPrevUsed = previousRecords.reduce((sum, r) => sum + r.gift_used, 0);
-  const remaining = totalPrevReceived + received - (totalPrevUsed + used);
+    const totalPrevReceived = previousRecords.reduce((sum, r) => sum + r.gift_received, 0);
+    const totalPrevUsed = previousRecords.reduce((sum, r) => sum + r.gift_used, 0);
+    const remaining = totalPrevReceived + received - (totalPrevUsed + used);
 
-  const newRecord = {
-    gift_storeId: formData.gift_storeId,
-    gift_premiumId: formData.gift_premiumId,
-    gift_promotionId: formData.gift_promotionId,
-    gift_received: received,
-    gift_used: used,
-    gift_remaining: remaining,
-    gift_date: formData.gift_date,
-    user_id: user.user_id,
-  };
+    const newRecord = {
+      gift_storeId: formData.gift_storeId,
+      gift_premiumId: formData.gift_premiumId,
+      gift_promotionId: formData.gift_promotionId,
+      gift_received: received,
+      gift_used: used,
+      gift_remaining: remaining,
+      gift_date: formData.gift_date,
+      user_id: user.user_id,
+    };
 
-  try {
-    const res = await fetch("/api/premium/add-usage", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newRecord),
-    });
+    try {
+      const res = await fetch("/api/premium/add-usage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newRecord),
+      });
 
-    const data = await res.json();
-    if (data.success) {
-      setRecords([...records, data.data]);
-      toast.success("บันทึกสำเร็จ", { description: "ข้อมูลถูกบันทึกแล้ว" });
-    } else {
-      throw new Error(data.error);
+      const data = await res.json();
+      if (data.success) {
+        setRecords([...records, data.data]);
+        toast.success("บันทึกสำเร็จ", { description: "ข้อมูลถูกบันทึกแล้ว" });
+      } else {
+        throw new Error(data.error);
+      }
+
+      setFormData({
+        gift_storeId: "",
+        gift_premiumId: "",
+        gift_promotionId: "",
+        gift_received: "",
+        gift_used: "",
+        gift_date: new Date().toISOString().split("T")[0],
+      });
+    } catch (error) {
+      toast.error("เกิดข้อผิดพลาด", { description: error.message });
+    } finally {
+      setIsSubmitting(false);
     }
+    };
 
-    setFormData({
-      gift_storeId: "",
-      gift_premiumId: "",
-      gift_promotionId: "",
-      gift_received: "",
-      gift_used: "",
-      gift_date: new Date().toISOString().split("T")[0],
-    });
-  } catch (error) {
-    toast.error("เกิดข้อผิดพลาด", { description: error.message });
-  }
-};
+    const getRemainingNow = () => {
+    const previous = records.filter(
+      (r) =>
+        r.gift_storeId === formData.gift_storeId &&
+        r.gift_premiumId === formData.gift_premiumId
+    );
 
-  const getRemainingNow = () => {
-  const previous = records.filter(
-    (r) =>
-      r.gift_storeId === formData.gift_storeId &&
-      r.gift_premiumId === formData.gift_premiumId
-  );
+    const totalPrevReceived = previous.reduce((sum, r) => sum + r.gift_received, 0);
+    const totalPrevUsed = previous.reduce((sum, r) => sum + r.gift_used, 0);
 
-  const totalPrevReceived = previous.reduce((sum, r) => sum + r.gift_received, 0);
-  const totalPrevUsed = previous.reduce((sum, r) => sum + r.gift_used, 0);
-
-  return totalPrevReceived - totalPrevUsed;
-};
-
-  const getStoreName = (storeId) => {
-    const store = storeList.find((s) => s.st_id_Code === storeId);
-    return store ? store.st_store_Name : "";
+    return totalPrevReceived - totalPrevUsed;
   };
 
-  const getPremiumName = (premiumId) => {
-  const p = premiumList.find(p => p.pm_id_premium === premiumId);
-  return p ? p.pm_name_premium : "";
-};
+    const getStoreName = (storeId) => {
+      const store = storeList.find((s) => s.st_id_Code === storeId);
+      return store ? store.st_store_Name : "";
+    };
+
+    const getPremiumName = (premiumId) => {
+    const p = premiumList.find(p => p.pm_id_premium === premiumId);
+    return p ? p.pm_name_premium : "";
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center mb-8">
-          <Button variant="outline" onClick={() => router.push("/form")} className="mr-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            กลับ
-          </Button>
+            <BackButton to="/form" />
           <div className="flex items-center">
             <Gift className="w-8 h-8 text-green-600 mr-3" />
             <div>
@@ -252,8 +254,12 @@ const PremiumUsage = () => {
                   <Input id="gift_date" type="date" value={formData.gift_date} onChange={(e) => setFormData({ ...formData, gift_date: e.target.value })} required />
                 </div>
 
-                <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
-                  บันทึกข้อมูล
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`w-full bg-green-600 hover:bg-green-700 ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  {isSubmitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
                 </Button>
               </form>
             </CardContent>

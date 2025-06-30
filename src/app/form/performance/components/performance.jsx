@@ -3,6 +3,7 @@
 import { useState,useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
+import BackButton from "../../../components/ui/backbutton";
 import { Label } from "../../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
 import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
@@ -16,6 +17,7 @@ const Performance = () => {
   const [userStoreName, setUserStoreName] = useState("");
   const [storeList, setStoreList] = useState([]);
   const [performance_records, setPerformanceRecords] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [performanceForm, setPerformanceForm] = useState({
     per_storeId: "",
     per_storeName: "",
@@ -88,12 +90,14 @@ const Performance = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
       toast.error("ไม่พบผู้ใช้", {
         description: "กรุณาเข้าสู่ระบบใหม่",
       });
+       setIsSubmitting(false);
       return;
     }
 
@@ -121,6 +125,7 @@ const Performance = () => {
         toast.success("บันทึกสำเร็จ", {
           description: "ข้อมูล Performance ถูกส่งไปยังฐานข้อมูลแล้ว",
         });
+        await new Promise((resolve) => setTimeout(resolve, 2000));
         window.location.reload();
       } else {
         throw new Error(result.message || "เกิดข้อผิดพลาดในการบันทึก");
@@ -129,6 +134,8 @@ const Performance = () => {
       toast.error("เกิดข้อผิดพลาด", {
         description: err.message,
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -155,10 +162,7 @@ const Performance = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center mb-8">
-          <Button variant="outline" onClick={() => router.push("/form")} className="mr-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            กลับ
-          </Button>
+            <BackButton to="/form" />
           <div className="flex items-center">
             <TrendingUp className="w-8 h-8 text-purple-600 mr-3" />
             <div>
@@ -315,7 +319,7 @@ const Performance = () => {
                   className="w-full bg-purple-600 hover:bg-purple-700"
                   disabled={!performanceForm.per_storeId || !performanceForm.per_result || !performanceForm.per_reason || !performanceForm.per_quantity}
                 >
-                  บันทึกข้อมูล
+                  {isSubmitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
                 </Button>
               </form>
             </CardContent>

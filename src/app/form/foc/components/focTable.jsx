@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
+import BackButton from "../../../components/ui/backbutton";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
@@ -16,6 +17,7 @@ const FOCUsage = () => {
   const [premiumList, setPremiumList] = useState([]);
   const [records, setRecords] = useState([]);
   const [selectedStoreId, setSelectedStoreId] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     foc_storeId: "",
     foc_premiumId: "",
@@ -94,7 +96,17 @@ const FOCUsage = () => {
 
     const foc_received = parseFloat(formData.foc_received);
     const foc_used = parseFloat(formData.foc_used);
-    const foc_remaining = getCumulativeRemaining(selectedStoreId, formData.foc_premiumId) + foc_received - foc_used;
+    const currentRemaining = getCumulativeRemaining(selectedStoreId, formData.foc_premiumId);
+
+    // ✅ ป้องกันการกรอกใช้เกินยอดที่มี
+    if (foc_used > currentRemaining + foc_received) {
+      toast.error("ใช้เกินยอดที่มีอยู่", {
+        description: `คุณใช้ไป ${foc_used} ชิ้น แต่มีอยู่เพียง ${(currentRemaining + foc_received).toLocaleString()} ชิ้น`,
+      });
+      return;
+    }
+
+    const foc_remaining = currentRemaining + foc_received - foc_used;
 
     const newRecord = {
       ...formData,
@@ -106,6 +118,7 @@ const FOCUsage = () => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
+      setIsSubmitting(true);
 
     try {
       const res = await fetch("/api/foc/add", {
@@ -132,12 +145,20 @@ const FOCUsage = () => {
     } catch (error) {
       toast.error("เกิดข้อผิดพลาด", { description: error.message });
     }
+      finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getStoreName = (storeId) => {
     const store = storeList.find((s) => s.st_id_Code === storeId);
     return store ? store.st_store_Name : storeId;
   };
+
+  const getPremiumName = (premiumId) => {
+  const p = premiumList.find(p => p.pm_id_premium === premiumId);
+  return p ? p.pm_name_premium : "";
+};
 
   const filteredRecords = selectedStoreId
     ? records.filter((r) => r.foc_storeId === selectedStoreId)
@@ -147,9 +168,7 @@ const FOCUsage = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center mb-8">
-          <Button variant="outline" onClick={() => router.push("/form")} className="mr-4">
-            <ArrowLeft className="w-4 h-4 mr-2" /> กลับ
-          </Button>
+            <BackButton to="/form" />
           <div className="flex items-center">
             <Package className="w-8 h-8 text-blue-600 mr-3" />
             <div>
@@ -225,7 +244,13 @@ const FOCUsage = () => {
                   <Input type="date" value={formData.foc_date} onChange={(e) => setFormData({ ...formData, foc_date: e.target.value })} required />
                 </div>
 
-                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">บันทึกข้อมูล</Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`w-full bg-blue-600 hover:bg-blue-700 ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  {isSubmitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                </Button>
               </form>
             </CardContent>
           </Card>
@@ -245,7 +270,7 @@ const FOCUsage = () => {
                       <div className="flex justify-between items-start mb-2">
                         <div>
                           <p className="font-semibold">ร้าน: {r.foc_storeId} - {getStoreName(r.foc_storeId)}</p>
-                          <p className="text-sm text-gray-600">สินค้า: {r.foc_premiumId}</p>
+                          <p className="text-sm text-gray-600">สินค้า: {r.foc_premiumId} - {getPremiumName(r.foc_premiumId)}</p>
                         </div>
                         <p className="text-sm text-gray-500">{r.foc_date}</p>
                       </div>
