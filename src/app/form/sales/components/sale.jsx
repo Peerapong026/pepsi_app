@@ -51,7 +51,7 @@ export default function SalesFullTablePage() {
     setSkuList(sorted);
     setItems(
       sorted.map((sku) => ({
-        sal_skuId: sku._id,
+        sal_skuId: sku.sku_id,
         sal_status: "",
         sal_quantity: "",
         sal_unitPrice: "",
@@ -143,7 +143,7 @@ export default function SalesFullTablePage() {
     // reset
     setItems(
       skuList.map((sku) => ({
-        sal_skuId: sku._id,
+        sal_skuId: sku.sku_id,
         sal_status: "",
         sal_quantity: "",
         sal_unitPrice: "",
@@ -212,11 +212,11 @@ export default function SalesFullTablePage() {
                 </thead>
                 <tbody>
                   {items.map((item, index) => {
-                    const sku = skuList.find((s) => s._id === item.sal_skuId);
+                    const sku = skuList.find((s) => s.sku_id === item.sal_skuId);
                     const showFields = item.sal_status === "มีขาย";
                     return (
                       <tr key={`${item.sal_skuId}-${index}`}>
-                        <td className="p-2 border">{item.sal_skuId}</td>
+                        <td className="p-2 border">{sku?.sku_id}</td>
                         <td className="p-2 border">{sku?.sku_name}</td>
                         <td className="p-2 border">
                           <Select

@@ -18,10 +18,6 @@ export async function POST(req) {
       return NextResponse.json({ message: "กรุณาเลือกสถานะสินค้าบางรายการ" }, { status: 400 });
     }
 
-    if (filteredItems.some(item => !mongoose.Types.ObjectId.isValid(item.sal_skuId))) {
-      return NextResponse.json({ message: "sal_skuId ไม่ถูกต้อง" }, { status: 400 });
-    }
-
     const today = new Date();
     const prefix = "SAL";
     const dateStr = today.toISOString().slice(0, 10).split("-").reverse().join("").slice(0, 6); // ddmmyy
@@ -38,7 +34,7 @@ export async function POST(req) {
     const sal_id = `${prefix}${dateStr}${String(nextNumber).padStart(3, "0")}`;
 
     const itemsWithTotal = filteredItems.map(item => ({
-      sal_skuId: new mongoose.Types.ObjectId(item.sal_skuId),
+      sal_skuId: item.sal_skuId,
       sal_status: item.sal_status,
       sal_quantity: parseFloat(item.sal_quantity || 0),
       sal_unitPrice: parseFloat(item.sal_unitPrice || 0),
