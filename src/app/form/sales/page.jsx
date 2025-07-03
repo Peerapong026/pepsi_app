@@ -9,7 +9,7 @@ export default function SalesPage() {
       <Tabs defaultValue="form">
         <TabsList className="mb-4">
           <TabsTrigger value="form">กรอกยอดขาย</TabsTrigger>
-          {/* <TabsTrigger value="history">ประวัติการกรอก</TabsTrigger> */}
+          <TabsTrigger value="history">ประวัติการกรอก</TabsTrigger>
         </TabsList>
 
         <TabsContent value="form">

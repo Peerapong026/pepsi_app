@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema(
   user_phone: { type: String, required: true, trim: true },
   user_email: { type: String, required: true, trim: true, lowercase: true },
   user_storeId: { type: [String], default: [] },
-  user_role: { type: String, enum: ["admin", "member"], default: "member" }
+  user_role: { type: String, enum: ["admin", "member","sup"], default: "member" }
 },{
     timestamps: true, // เพิ่ม createdAt, updatedAt
   }

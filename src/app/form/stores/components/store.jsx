@@ -21,7 +21,7 @@ const Stores = () => {
     st_Region: "",
     st_DT_Name: "",
     st_DT_Code: "",
-    st_store_Name: ""
+    st_store_Name: "",
   });
 
 useEffect(() => {

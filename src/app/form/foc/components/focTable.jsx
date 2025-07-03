@@ -101,7 +101,7 @@ const FOCUsage = () => {
     // ✅ ป้องกันการกรอกใช้เกินยอดที่มี
     if (foc_used > currentRemaining + foc_received) {
       toast.error("ใช้เกินยอดที่มีอยู่", {
-        description: `คุณใช้ไป ${foc_used} ชิ้น แต่มีอยู่เพียง ${(currentRemaining + foc_received).toLocaleString()} ชิ้น`,
+        description: `คุณใช้ไป ${foc_used} ชิ้น แต่ยอดคงเหลือมีอยู่เพียง ${(currentRemaining + foc_received).toLocaleString()} ชิ้น`,
       });
       return;
     }
@@ -161,8 +161,14 @@ const FOCUsage = () => {
 };
 
   const filteredRecords = selectedStoreId
-    ? records.filter((r) => r.foc_storeId === selectedStoreId)
-    : [];
+  ? records.filter((r) => {
+      const isSameStore = r.foc_storeId === selectedStoreId;
+      const isSamePremium = formData.foc_premiumId
+        ? r.foc_premiumId === formData.foc_premiumId
+        : true; // ถ้ายังไม่เลือก premium ให้แสดงทั้งหมดของร้าน
+      return isSameStore && isSamePremium;
+    })
+  : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">

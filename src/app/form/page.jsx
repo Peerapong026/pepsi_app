@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Package, Gift, TrendingUp, ShoppingCart, Building2, ChartNoAxesCombined, Boxes, FileSymlink, UserCog } from "lucide-react";
+import { Package, Gift, TrendingUp, ShoppingCart, Building2, ChartNoAxesCombined, Boxes, FileSymlink, UserCog, CheckCircle } from "lucide-react";
 import Navbar from "../components/ui/navbar";
 
 const allMenuItems = [
@@ -77,8 +77,17 @@ const allMenuItems = [
     color: "bg-yellow-300",
     href: "/form/export",
     roles: ["admin"] // 👈 เฉพาะ admin เท่านั้น
-  }
+  },
+  {
+  title: "ตรวจสอบการส่งงาน",
+  description: "ตรวจสอบการส่งข้อมูลจากพนักงาน",
+  icon: <CheckCircle className="w-8 h-8 text-white" />,
+  color: "bg-teal-600",
+  href: "/form/check",
+  roles: ["sup","admin"]
+}
 ];
+
 
 export default function FormMenu() {
   const [role, setRole] = useState("");

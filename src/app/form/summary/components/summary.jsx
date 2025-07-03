@@ -8,6 +8,7 @@ import PerformancePieChart from "../../summary/components/PerformancePieChart";
 import FOCPremiumSummaryTable from "../../summary/components/FOCPremiumSummaryTable";
 import {Building2,TrendingUp,Package,Gift,ShoppingCart} from "lucide-react";
 import BackButton from "../../../components/ui/backbutton";
+import SalesStatusTable from "../../summary/components/SalesStatusTable";
 
 export default function DashboardPage() {
   const [rawData, setRawData] = useState({ foc: [], premium: [], performance: [], sales: [] });
@@ -165,6 +166,13 @@ export default function DashboardPage() {
             />
           </div>
         )}
+
+        {/* {selectedTypes.sales && (
+          <div className="rounded-xl shadow-sm border bg-white p-6 mb-6">
+            <h2 className="text-lg font-bold mb-4">รายการสินค้าตามสถานะในแต่ละร้าน</h2>
+            <SalesStatusTable salesData={filteredData.sales} meta={meta} />
+          </div>
+        )} */}
       </div>
     </div>
   );

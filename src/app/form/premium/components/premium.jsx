@@ -82,10 +82,22 @@ const PremiumUsage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+
     const user = JSON.parse(localStorage.getItem("user"));
     const received = parseFloat(formData.gift_received);
     const used = parseFloat(formData.gift_used);
 
+    // 🔒 ตรวจสอบยอดใช้ไม่เกินยอดคงเหลือสะสม
+    const remainingBefore = getRemainingNow();
+    if (used > remainingBefore + received) {
+      toast.error("ใช้เกินยอดที่มีอยู่", {
+        description: `คุณใช้ไป ${used} ชิ้น แต่ยอดคงเหลือมีอยู่เพียง ${remainingBefore + received} ชิ้น`,
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // ดำเนินการบันทึกต่อ...
     const previousRecords = records.filter(
       (r) =>
         r.gift_storeId === formData.gift_storeId &&
@@ -159,6 +171,16 @@ const PremiumUsage = () => {
     const p = premiumList.find(p => p.pm_id_premium === premiumId);
     return p ? p.pm_name_premium : "";
   };
+
+    const filteredRecords = formData.gift_storeId
+    ? records.filter((r) => {
+        const sameStore = r.gift_storeId === formData.gift_storeId;
+        const samePremium = formData.gift_premiumId
+          ? r.gift_premiumId === formData.gift_premiumId
+          : true; // ถ้ายังไม่เลือก premium ให้แสดงทั้งหมดของร้าน
+        return sameStore && samePremium;
+      })
+    : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
@@ -275,7 +297,7 @@ const PremiumUsage = () => {
                 {records.length === 0 ? (
                   <p className="text-center text-gray-500 py-8">ยังไม่มีข้อมูลการใช้ Premium</p>
                 ) : (
-                  records.map((record,index) => (
+                  filteredRecords.map((record,index) => (
                     <div key={record.id|| record.gift_id || index} className="border rounded-lg p-4 bg-gray-50">
                       <div className="flex justify-between items-start mb-2">
                         <div>
