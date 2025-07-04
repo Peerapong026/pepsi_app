@@ -78,14 +78,14 @@ const allMenuItems = [
     href: "/form/export",
     roles: ["admin"] // 👈 เฉพาะ admin เท่านั้น
   },
-  {
-  title: "ตรวจสอบการส่งงาน",
-  description: "ตรวจสอบการส่งข้อมูลจากพนักงาน",
-  icon: <CheckCircle className="w-8 h-8 text-white" />,
-  color: "bg-teal-600",
-  href: "/form/check",
-  roles: ["sup","admin"]
-}
+//   {
+//   title: "ตรวจสอบการส่งงาน",
+//   description: "ตรวจสอบการส่งข้อมูลจากพนักงาน",
+//   icon: <CheckCircle className="w-8 h-8 text-white" />,
+//   color: "bg-teal-600",
+//   href: "/form/check",
+//   roles: ["sup","admin"]
+// }
 ];
 
 
