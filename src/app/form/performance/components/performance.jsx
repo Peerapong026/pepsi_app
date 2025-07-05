@@ -92,6 +92,36 @@ const Performance = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // ตรวจว่ากรอกข้อมูลครบถ้วน
+  const requiredFields = [
+    { key: "per_storeId", label: "ร้านค้า" },
+    { key: "per_result", label: "ผลการชิม" },
+    { key: "per_reason", label: "เหตุผล" },
+    { key: "per_quantity", label: "จำนวน" },
+    { key: "per_date", label: "วันที่" },
+  ];
+
+  for (const field of requiredFields) {
+    const value = performanceForm[field.key];
+    if (!value || value.toString().trim() === "") {
+      toast.error("กรุณากรอกข้อมูลให้ครบ", {
+        description: `กรุณาเลือกหรือกรอก: ${field.label}`,
+      });
+      setIsSubmitting(false);
+      return;
+    }
+  }
+
+  // ตรวจไม่ให้กรอกเลขติดลบ หรือ 0
+  const quantity = parseInt(performanceForm.per_quantity || "0", 10);
+  if (isNaN(quantity) || quantity <= 0) {
+    toast.error("จำนวนต้องมากกว่า 0", {
+      description: "กรุณากรอกจำนวนคนที่ชิมเป็นเลขจำนวนเต็มมากกว่า 0",
+    });
+    setIsSubmitting(false);
+    return;
+  }
+
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
       toast.error("ไม่พบผู้ใช้", {

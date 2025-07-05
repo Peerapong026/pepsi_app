@@ -94,8 +94,40 @@ const FOCUsage = () => {
       return;
     }
 
+    // ✅ ตรวจสอบว่ากรอกข้อมูลครบ
+    const requiredFields = [
+      { key: "foc_storeId", label: "ร้านค้า" },
+      { key: "foc_premiumId", label: "สินค้า FOC" },
+      { key: "foc_received", label: "จำนวนที่รับ" },
+      { key: "foc_used", label: "จำนวนที่ใช้" },
+      { key: "foc_date", label: "วันที่" },
+    ];
+
+    for (const field of requiredFields) {
+      if (!formData[field.key] || formData[field.key].toString().trim() === "") {
+        toast.error("กรุณากรอกข้อมูลให้ครบ", {
+          description: `กรุณาเลือกหรือกรอก: ${field.label}`,
+        });
+        return;
+      }
+    }
+
+    // ✅ ตรวจสอบค่าตัวเลขและไม่ติดลบ
     const foc_received = parseFloat(formData.foc_received);
     const foc_used = parseFloat(formData.foc_used);
+
+    if (isNaN(foc_received) || isNaN(foc_used)) {
+      toast.error("จำนวนต้องเป็นตัวเลขเท่านั้น");
+      return;
+    }
+
+    if (foc_received < 0 || foc_used < 0) {
+      toast.error("ห้ามกรอกจำนวนติดลบ", {
+        description: "กรอกจำนวนรับและใช้เป็นศูนย์หรือมากกว่าเท่านั้น",
+      });
+      return;
+    }
+
     const currentRemaining = getCumulativeRemaining(selectedStoreId, formData.foc_premiumId);
 
     // ✅ ป้องกันการกรอกใช้เกินยอดที่มี
@@ -217,9 +249,9 @@ const FOCUsage = () => {
                 </div>
 
                 <div>
-                  <Label>สินค้า Premium</Label>
+                  <Label>สินค้า FOC</Label>
                   <Select value={formData.foc_premiumId} onValueChange={(v) => setFormData({ ...formData, foc_premiumId: v })}>
-                    <SelectTrigger><SelectValue placeholder="เลือกสินค้า Premium" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="เลือกสินค้า FOC" /></SelectTrigger>
                     <SelectContent>
                       {premiumList.map((p) => (
                         <SelectItem key={p.pm_id_premium} value={p.pm_id_premium}>

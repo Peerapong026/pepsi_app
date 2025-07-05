@@ -8,14 +8,10 @@ import BackButton from "../../../components/ui/backbutton";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Checkbox } from "../../../components/ui/checkbox";
-import { useToast } from "../../../hooks/use-toast"; // ✅ ใช้ path ตรง
-
-
+import { toast } from "sonner"; // ✅ ใช้ sonner โดยตรง
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { toast } = useToast();
-
   const [storeList, setStoreList] = useState([]);
   const [formData, setFormData] = useState({
     user_id: "",
@@ -68,7 +64,7 @@ export default function RegisterPage() {
 
       if (data.success) {
         toast("ลงทะเบียนสำเร็จ");
-        router.push("/login");
+        router.push("/form");
       } else {
         toast("เกิดข้อผิดพลาด", {
           description: data.message || "ไม่สามารถลงทะเบียนได้",

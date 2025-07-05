@@ -63,7 +63,6 @@ export default function SalesFullTablePage() {
   fetchSKUs();
 }, []);
 
-
   const updateItem = (index, field, value) => {
     const updated = [...items];
     updated[index][field] = value;
@@ -81,19 +80,34 @@ export default function SalesFullTablePage() {
   };
 
   const validateForm = () => {
-  if (!sal_storeId) return false;
+    const errors = [];
 
-  const valid = items.every((item) => {
-    if (!item.sal_status) return false;
-    if (item.sal_status === "มีขาย") {
-      return item.sal_quantity && item.sal_unitPrice;
+    if (!sal_storeId || !sal_date) {
+      errors.push("• กรุณาเลือกร้านและวันที่");
     }
-    return true;
-  });
 
-  return valid;
-};
+    items.forEach((item, index) => {
+      const sku = skuList.find((s) => s.sku_id === item.sal_skuId);
+      const skuName = sku?.sku_name || item.sal_skuId;
 
+      if (!item.sal_status) {
+        errors.push(`• ${skuName} - ยังไม่ได้เลือกสถานะ`);
+      } else if (item.sal_status === "มีขาย") {
+        const qty = parseFloat(item.sal_quantity);
+        const price = parseFloat(item.sal_unitPrice);
+
+        if (!item.sal_quantity || qty <= 0) {
+          errors.push(`• ${skuName} - จำนวนต้องมากกว่า 0`);
+        }
+
+        if (!item.sal_unitPrice || price <= 0) {
+          errors.push(`• ${skuName} - ราคาต้องมากกว่า 0`);
+        }
+      }
+    });
+
+    return errors;
+  };
 
   const handleSubmit = async (e) => {
   e.preventDefault();
@@ -107,12 +121,14 @@ export default function SalesFullTablePage() {
       sal_totalPrice: calculateTotal(item.sal_quantity, item.sal_unitPrice),
     }));
 
-  if (!validateForm()) {
-  toast.error("กรุณากรอกข้อมูลให้ครบ", {
-    description: "ตรวจสอบว่าทุกสินค้ามีสถานะ และถ้า 'มีขาย' ต้องระบุจำนวนและราคา",
-  });
-  return;
-}
+  const errors = validateForm();
+    if (errors.length > 0) {
+      toast.error("กรอกข้อมูลไม่ครบ", {
+        description: errors.join("\n"),
+        duration: 8000, // แสดงนานขึ้น
+      });
+      return;
+    }
 
   const payload = {
     sal_storeId,

@@ -84,8 +84,43 @@ const PremiumUsage = () => {
     setIsSubmitting(true);
 
     const user = JSON.parse(localStorage.getItem("user"));
+
+    // ✅ ตรวจสอบว่ากรอกข้อมูลครบ
+    const requiredFields = [
+      { key: "gift_storeId", label: "ร้านค้า" },
+      { key: "gift_premiumId", label: "สินค้า Premium" },
+      { key: "gift_received", label: "จำนวนที่รับ" },
+      { key: "gift_used", label: "จำนวนที่ใช้" },
+      { key: "gift_date", label: "วันที่" },
+    ];
+
+    for (const field of requiredFields) {
+      if (!formData[field.key] || formData[field.key].toString().trim() === "") {
+        toast.error("กรุณากรอกข้อมูลให้ครบ", {
+          description: `กรุณาเลือกหรือกรอก: ${field.label}`,
+        });
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
+    // ✅ ตรวจสอบว่าเป็นตัวเลข และไม่ติดลบ
     const received = parseFloat(formData.gift_received);
     const used = parseFloat(formData.gift_used);
+
+    if (isNaN(received) || isNaN(used)) {
+      toast.error("จำนวนต้องเป็นตัวเลขเท่านั้น");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (received < 0 || used < 0) {
+      toast.error("ห้ามกรอกจำนวนติดลบ", {
+        description: "กรอกจำนวนรับและใช้เป็นศูนย์หรือมากกว่าเท่านั้น",
+      });
+      setIsSubmitting(false);
+      return;
+    }
 
     // 🔒 ตรวจสอบยอดใช้ไม่เกินยอดคงเหลือสะสม
     const remainingBefore = getRemainingNow();
@@ -226,7 +261,7 @@ const PremiumUsage = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="gift_premiumId">รหัสสินค้า Premium</Label>
+                  <Label htmlFor="gift_premiumId">สินค้า Premium</Label>
                   <Select value={formData.gift_premiumId} onValueChange={(value) => setFormData({ ...formData, gift_premiumId: value })}>
                     <SelectTrigger>
                       <SelectValue placeholder="เลือกสินค้า Premium" />

@@ -9,11 +9,10 @@ import { Label } from "../../../components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
 import { ArrowLeft, Plus, Archive } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useToast } from "../../../hooks/use-toast";
+import { toast } from "sonner"; // ✅ ใช้ sonner โดยตรง
 
 export default function ProductPage() {
   const router = useRouter();
-  const { toast } = useToast();
 
   const [skuList, setSkuList] = useState([]);
   const [sampleList, setSampleList] = useState([]);
@@ -52,130 +51,129 @@ export default function ProductPage() {
   });
 
   const handleSubmitSku = async (e) => {
-  e.preventDefault();
-  const newItem = {
-    ...skuForm,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    e.preventDefault();
+    const newItem = {
+      ...skuForm,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (!newItem.sku_id || !newItem.sku_name) {
+      toast({ title: "กรุณากรอกข้อมูล SKU ให้ครบถ้วน" });
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/products/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newItem),
+      });
+
+      if (!res.ok) throw new Error("บันทึกข้อมูลไม่สำเร็จ");
+
+      setSkuList((prev) => [...prev, newItem]);
+      setSkuForm({
+        sku_id: "",
+        sku_name: "",
+        sku_category: "",
+        sku_volume: "",
+        sku_packsize: "",
+        sku_numberlot: "",
+        sku_expiration_date: "",
+      });
+
+      toast("บันทึกสำเร็จ", {description: "ข้อมูล SKU ถูกบันทึกแล้ว",});
+    } catch (err) {
+      toast("เกิดข้อผิดพลาด", { description: err.message });
+    }
   };
 
-  // ตรวจสอบว่า sku_id และ sku_name ต้องมี
-  if (!newItem.sku_id || !newItem.sku_name) {
-    toast({ title: "กรุณากรอกข้อมูล SKU ให้ครบถ้วน" });
-    return;
-  }
+  const handleSubmitSample = async (e) => {
+    e.preventDefault();
+    const newItem = {
+      ...sampleForm,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
-  try {
-    const res = await fetch("/api/products/add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newItem),
-    });
+    if (!newItem.pm_id_premium || !newItem.pm_name_premium) {
+      toast("กรุณากรอกข้อมูลของชิมให้ครบถ้วน");
+      return;
+    }
 
-    if (!res.ok) throw new Error("บันทึกข้อมูลไม่สำเร็จ");
+    try {
+      const res = await fetch("/api/premium/add-sample", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newItem),
+      });
 
-    setSkuList((prev) => [...prev, newItem]);
-    setSkuForm({
-      sku_id: "",
-      sku_name: "",
-      sku_category: "",
-      sku_volume: "",
-      sku_packsize: "",
-      sku_numberlot: "",
-      sku_expiration_date: "",
-    });
+      if (!res.ok) throw new Error("บันทึกข้อมูลไม่สำเร็จ");
 
-    toast({ title: "บันทึกสำเร็จ", description: "ข้อมูล SKU ถูกบันทึกแล้ว" });
-  } catch (err) {
-    toast({ title: "เกิดข้อผิดพลาด", description: err.message });
-  }
-};
+      setSampleList((prev) => [...prev, newItem]);
+      setSampleForm({
+        pm_id_premium: "",
+        pm_type_premium: "ของชิม",
+        pm_name_premium: "",
+        pm_category: "",
+        pm_volume: "",
+        pm_packsize: "",
+        pm_numberlot: "",
+        pm_expire: "",
+      });
 
-const handleSubmitSample = async (e) => {
-  e.preventDefault();
-  const newItem = {
-    ...sampleForm,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+      toast("บันทึกสำเร็จ", { description: "ของชิมถูกบันทึกแล้ว" });
+    } catch (err) {
+      toast("เกิดข้อผิดพลาด", { description: err.message });
+    }
   };
 
-  if (!newItem.pm_id_premium || !newItem.pm_name_premium) {
-    toast({ title: "กรุณากรอกข้อมูลของชิมให้ครบถ้วน" });
-    return;
-  }
+  const handleSubmitGift = async (e) => {
+    e.preventDefault();
+    const newItem = {
+      ...giftForm,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
-  try {
-    const res = await fetch("/api/premium/add-sample", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newItem),
-    });
+    if (!newItem.pm_id_premium || !newItem.pm_name_premium) {
+      toast("กรุณากรอกข้อมูลของแถมให้ครบถ้วน");
+      return;
+    }
 
-    if (!res.ok) throw new Error("บันทึกข้อมูลไม่สำเร็จ");
+    try {
+      const res = await fetch("/api/premium/add-gift", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newItem),
+      });
 
-    setSampleList((prev) => [...prev, newItem]);
-    setSampleForm({
-      pm_id_premium: "",
-      pm_type_premium: "ของชิม",
-      pm_name_premium: "",
-      pm_category: "",
-      pm_volume: "",
-      pm_packsize: "",
-      pm_numberlot: "",
-      pm_expire: "",
-    });
+      if (!res.ok) throw new Error("บันทึกข้อมูลไม่สำเร็จ");
 
-    toast({ title: "บันทึกสำเร็จ", description: "ของชิมถูกบันทึกแล้ว" });
-  } catch (err) {
-    toast({ title: "เกิดข้อผิดพลาด", description: err.message });
-  }
-};
+      setGiftList((prev) => [...prev, newItem]);
+      setGiftForm({
+        pm_id_premium: "",
+        pm_type_premium: "ของแถม",
+        pm_name_premium: "",
+        pm_category: "",
+        pm_volume: "",
+        pm_packsize: "",
+        pm_numberlot: "",
+        pm_expire: "",
+      });
 
-const handleSubmitGift = async (e) => {
-  e.preventDefault();
-  const newItem = {
-    ...giftForm,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+      toast("บันทึกสำเร็จ", { description: "ของแถมถูกบันทึกแล้ว" });
+    } catch (err) {
+      toast("เกิดข้อผิดพลาด", { description: err.message });
+    }
   };
-
-  if (!newItem.pm_id_premium || !newItem.pm_name_premium) {
-    toast({ title: "กรุณากรอกข้อมูลของแถมให้ครบถ้วน" });
-    return;
-  }
-
-  try {
-    const res = await fetch("/api/premium/add-gift", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newItem),
-    });
-
-    if (!res.ok) throw new Error("บันทึกข้อมูลไม่สำเร็จ");
-
-    setGiftList((prev) => [...prev, newItem]);
-    setGiftForm({
-      pm_id_premium: "",
-      pm_type_premium: "ของแถม",
-      pm_name_premium: "",
-      pm_category: "",
-      pm_volume: "",
-      pm_packsize: "",
-      pm_numberlot: "",
-      pm_expire: "",
-    });
-
-    toast({ title: "บันทึกสำเร็จ", description: "ของแถมถูกบันทึกแล้ว" });
-  } catch (err) {
-    toast({ title: "เกิดข้อผิดพลาด", description: err.message });
-  }
-};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50">
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center mb-8">
-            <BackButton to="/form" />
+          <BackButton to="/form" />
           <div className="flex items-center">
             <Archive className="w-8 h-8 text-teal-600 mr-3" />
             <div>
@@ -200,8 +198,7 @@ const handleSubmitGift = async (e) => {
                 <CardDescription>ฟอร์มกรอกข้อมูลสินค้า SKU</CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmitSku}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleSubmitSku} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div><Label>รหัส SKU</Label><Input value={skuForm.sku_id} onChange={e => setSkuForm({ ...skuForm, sku_id: e.target.value })} /></div>
                   <div><Label>ชื่อสินค้า</Label><Input value={skuForm.sku_name} onChange={e => setSkuForm({ ...skuForm, sku_name: e.target.value })} /></div>
                   <div><Label>แบรนด์</Label><Input value={skuForm.sku_category} onChange={e => setSkuForm({ ...skuForm, sku_category: e.target.value })} /></div>
@@ -217,15 +214,12 @@ const handleSubmitGift = async (e) => {
             </Card>
           </TabsContent>
 
-          {/* ของชิม */}
+          {/* Sample */}
           <TabsContent value="sample">
             <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>เพิ่มของชิม</CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle>เพิ่มของชิม</CardTitle></CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmitSample}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleSubmitSample} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div><Label>รหัส</Label><Input value={sampleForm.pm_id_premium} onChange={e => setSampleForm({ ...sampleForm, pm_id_premium: e.target.value })} /></div>
                   <div><Label>ชื่อ</Label><Input value={sampleForm.pm_name_premium} onChange={e => setSampleForm({ ...sampleForm, pm_name_premium: e.target.value })} /></div>
                   <div><Label>ประเภท</Label><Input value={sampleForm.pm_type_premium} onChange={e => setSampleForm({ ...sampleForm, pm_type_premium: e.target.value })} /></div>
@@ -242,15 +236,12 @@ const handleSubmitGift = async (e) => {
             </Card>
           </TabsContent>
 
-          {/* ของแถม */}
+          {/* Gift */}
           <TabsContent value="gift">
             <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>เพิ่มของแถม</CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle>เพิ่มของแถม</CardTitle></CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmitGift}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleSubmitGift} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div><Label>รหัส</Label><Input value={giftForm.pm_id_premium} onChange={e => setGiftForm({ ...giftForm, pm_id_premium: e.target.value })} /></div>
                   <div><Label>ชื่อ</Label><Input value={giftForm.pm_name_premium} onChange={e => setGiftForm({ ...giftForm, pm_name_premium: e.target.value })} /></div>
                   <div><Label>ประเภท</Label><Input value={giftForm.pm_type_premium} onChange={e => setGiftForm({ ...giftForm, pm_type_premium: e.target.value })} /></div>

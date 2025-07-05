@@ -9,11 +9,10 @@ import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { ArrowLeft, Plus, Building2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useToast } from "../../../hooks/use-toast";
+import { toast } from "sonner";
 
 const Stores = () => {
   const router = useRouter();
-  const { toast } = useToast();
   const [stores, setStores] = useState([]);
   const [formData, setFormData] = useState({
     st_id_Code: "",
@@ -24,18 +23,23 @@ const Stores = () => {
     st_store_Name: "",
   });
 
-useEffect(() => {
-  const fetchStores = async () => {
-    try {
-      const res = await fetch("/api/stores/get");
-      const data = await res.json();
-      setStores(data);
-    } catch (error) {
-      toast({ title: "เกิดข้อผิดพลาด", description: "โหลดร้านค้าไม่สำเร็จ" });
-    }
-  };
-  fetchStores();
-}, []);
+  useEffect(() => {
+    const fetchStores = async () => {
+      try {
+        const res = await fetch("/api/stores/get");
+        if (!res.ok) throw new Error("โหลดข้อมูลร้านค้าไม่สำเร็จ");
+        const data = await res.json();
+        setStores(data);
+      } catch (error) {
+        console.error("fetch error:", error);
+        ({
+          title: "เกิดข้อผิดพลาด",
+          description: "โหลดร้านค้าไม่สำเร็จ",
+        });
+      }
+    };
+    fetchStores();
+  }, []);
 
   const handleSubmit = async (e) => {
   e.preventDefault();
@@ -193,7 +197,7 @@ useEffect(() => {
                       </div>
                       <div>
                         <p className="text-gray-600">DT:</p>
-                        <p className="font-semibold">{store.st_DT_Name} ({store.st_DT_Code})</p>
+                        <p className="font-semibold">{store.st_DT_Name || "-"} ({store.st_DT_Code || "-"})</p>
                       </div>
                     </div>
                   </div>
