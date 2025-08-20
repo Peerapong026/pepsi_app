@@ -32,7 +32,7 @@ const Stores = () => {
         setStores(data);
       } catch (error) {
         console.error("fetch error:", error);
-        ({
+        toast({
           title: "เกิดข้อผิดพลาด",
           description: "โหลดร้านค้าไม่สำเร็จ",
         });
@@ -69,9 +69,9 @@ const Stores = () => {
       st_DT_Code: ""
     });
 
-    toast({ title: "บันทึกสำเร็จ", description: "ข้อมูลร้านค้าถูกบันทึกแล้ว" });
+    toast("บันทึกสำเร็จ", { description: "ข้อมูลร้านค้าถูกบันทึกแล้ว" });
   } catch (err) {
-    toast({ title: "เกิดข้อผิดพลาด", description: err.message });
+    toast("เกิดข้อผิดพลาด", { description: err.message });
   }
 };
 

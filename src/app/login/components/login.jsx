@@ -54,7 +54,14 @@ export default function LoginPage() {
         onSubmit={handleLogin}
         className="bg-white p-8 sm:p-10 rounded-2xl shadow-xl w-full max-w-sm sm:max-w-md"
       >
-        <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">เข้าสู่ระบบ</h2>
+        <div className=" flex items-center justify-center bg-[#ffffff] px-4 mb-2">
+        <img
+          src="https://www.pepsico.com/images/default-source/products-brands/pepsi-brand-logo---320x320.png?sfvrsn=60c7278e_3"
+          alt="Pepsi Logo"
+          className="w-20 h-20 object-contain items-center rounded-full shadow-md mt-1"
+          draggable={false}
+        /></div>
+        <h2 className="text-2xl font-bold text-center text-blue-700 mb-6">เข้าสู่ระบบ</h2>
 
         <div className="mb-4">
           <label className="block mb-1 font-semibold text-gray-700">รหัสผู้ใช้</label>

@@ -1,12 +1,12 @@
 
 import React from 'react';
-import Check from './components/check';
+import Editdata from './components/edit';
 
 
 export default function Page() {
   return (
     <div>
-      <Check />
+      <Editdata />
     </div>
   );
 }

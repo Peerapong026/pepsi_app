@@ -8,7 +8,7 @@ import BackButton from "../../../components/ui/backbutton";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
-import { ArrowLeft, Plus, Package } from "lucide-react";
+import { ArrowLeft, Plus, Package, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 const FOCUsage = () => {
@@ -18,6 +18,7 @@ const FOCUsage = () => {
   const [records, setRecords] = useState([]);
   const [selectedStoreId, setSelectedStoreId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [formData, setFormData] = useState({
     foc_storeId: "",
     foc_premiumId: "",
@@ -82,7 +83,11 @@ const FOCUsage = () => {
 
   const getCumulativeRemaining = (storeId, premiumId) => {
     return records
-      .filter((r) => r.foc_storeId === storeId && r.foc_premiumId === premiumId)
+      .filter((r) => {
+        const isSame = r.foc_storeId === storeId && r.foc_premiumId === premiumId;
+        const isNotEditing = !editId || r._id !== editId;
+        return isSame && isNotEditing;
+      })
       .reduce((acc, cur) => acc + (parseFloat(cur.foc_received) - parseFloat(cur.foc_used)), 0);
   };
 
@@ -152,35 +157,53 @@ const FOCUsage = () => {
     };
       setIsSubmitting(true);
 
-    try {
-      const res = await fetch("/api/foc/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newRecord),
-      });
+      try {
+        const url = editId ? "/api/foc/edit" : "/api/foc/add";
+        const method = editId ? "PUT" : "POST";
 
-      const data = await res.json();
-
-      if (data.success) {
-        setRecords([...records, data.data]);
-        toast.success("บันทึกสำเร็จ", { description: "ข้อมูลการใช้ FOC ถูกบันทึกแล้ว" });
-        setFormData({
-          foc_storeId: "",
-          foc_premiumId: "",
-          foc_received: "",
-          foc_used: "",
-          foc_date: new Date().toISOString().split("T")[0],
+        const res = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editId ? { ...newRecord, _id: editId } : newRecord),
         });
-      } else {
-        throw new Error(data.message);
+
+        const data = await res.json();
+
+        if (data.success) {
+          if (editId) {
+            setRecords(records.map((r) => (r._id === editId ? data.data : r)));
+            setEditId(null);
+            toast.success("แก้ไขสำเร็จ");
+          } else {
+            setRecords([...records, data.data]);
+            toast.success("บันทึกสำเร็จ");
+          }
+          setFormData({ foc_storeId: "", foc_premiumId: "", foc_received: "", foc_used: "", foc_date: new Date().toISOString().split("T")[0] });
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        toast.error("เกิดข้อผิดพลาด", { description: error.message });
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      toast.error("เกิดข้อผิดพลาด", { description: error.message });
-    }
-      finally {
-      setIsSubmitting(false);
-    }
-  };
+    };
+
+    const handleDelete = async (id) => {
+      if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?")) return;
+      try {
+        const res = await fetch(`/api/foc/delete?id=${id}`, { method: "DELETE" });
+        const json = await res.json();
+        if (json.success) {
+          setRecords(records.filter((r) => r._id !== id));
+          toast.success("ลบข้อมูลสำเร็จ");
+        } else {
+          throw new Error(json.message);
+        }
+      } catch (error) {
+        toast.error("เกิดข้อผิดพลาด", { description: error.message });
+      }
+    };
 
   const getStoreName = (storeId) => {
     const store = storeList.find((s) => s.st_id_Code === storeId);
@@ -220,11 +243,16 @@ const FOCUsage = () => {
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Plus className="w-5 h-5 mr-2" /> บันทึกการใช้ FOC
+                <Plus className="w-5 h-5 mr-2" /> {editId ? "แก้ไขการใช้ FOC" : "บันทึกการใช้ FOC"}
               </CardTitle>
               <CardDescription>กรอกข้อมูลการรับและใช้ของชิม FOC ในแต่ละวัน</CardDescription>
             </CardHeader>
             <CardContent>
+              {editId && (
+                <div className="p-2 bg-yellow-100 text-yellow-800 rounded text-sm mb-4">
+                  กำลังแก้ไขข้อมูล ID: {editId}
+                </div>
+              )}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Label>เลือกร้าน</Label>
@@ -281,14 +309,37 @@ const FOCUsage = () => {
                   <Label>วันที่ใช้</Label>
                   <Input type="date" value={formData.foc_date} onChange={(e) => setFormData({ ...formData, foc_date: e.target.value })} required />
                 </div>
-
+                
+                <div className="flex gap-2 pt-2">
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`w-full bg-blue-600 hover:bg-blue-700 ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`flex-1 bg-blue-600 hover:bg-blue-700 ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   {isSubmitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
                 </Button>
+                 {editId && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      // รีเซ็ตค่าและออกจากโหมดแก้ไข
+                      setEditId(null);
+                      setFormData({
+                        foc_storeId: "",
+                        foc_premiumId: "",
+                        foc_received: "",
+                        foc_used: "",
+                        foc_date: new Date().toISOString().split("T")[0],
+                      });
+                      setSelectedStoreId("");
+                    }}
+                  >
+                    ยกเลิก
+                  </Button>
+                )}
+              </div>  
               </form>
             </CardContent>
           </Card>
@@ -304,18 +355,56 @@ const FOCUsage = () => {
                   <p className="text-center text-gray-500 py-8">ยังไม่มีข้อมูล</p>
                 ) : (
                   filteredRecords.map((r, idx) => (
-                    <div key={r.foc_id || idx} className="border rounded-lg p-4 bg-gray-50">
+                    <div key={r._id || idx} className="border rounded-lg p-4 bg-gray-50">
                       <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="font-semibold">ร้าน: {r.foc_storeId} - {getStoreName(r.foc_storeId)}</p>
-                          <p className="text-sm text-gray-600">สินค้า: {r.foc_premiumId} - {getPremiumName(r.foc_premiumId)}</p>
-                        </div>
+                      <div className="mb-2">
+                        <p className="font-semibold">
+                          ร้าน: {r.foc_storeId} - {getStoreName(r.foc_storeId)}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          สินค้า: {r.foc_premiumId} - {getPremiumName(r.foc_premiumId)}
+                        </p>
+                      </div>
                         <p className="text-sm text-gray-500">{r.foc_date}</p>
                       </div>
-                      <div className="grid grid-cols-3 gap-2 text-sm">
-                        <div><p className="text-gray-600">รับมา</p><p className="font-semibold text-green-600">{r.foc_received}</p></div>
-                        <div><p className="text-gray-600">ใช้ไป</p><p className="font-semibold text-red-600">{r.foc_used}</p></div>
-                        <div><p className="text-gray-600">คงเหลือ</p><p className="font-semibold text-blue-600">{r.foc_remaining}</p></div>
+                      <div className="grid grid-cols-3 gap-2 text-sm mb-4">
+                        <div>
+                          <p className="text-gray-600">รับมา</p>
+                          <p className="font-semibold text-green-600">{r.foc_received}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">ใช้ไป</p>
+                          <p className="font-semibold text-red-600">{r.foc_used}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">คงเหลือ</p>
+                          <p className="font-semibold text-blue-600">{r.foc_remaining}</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
+                          onClick={() => {
+                            setEditId(r._id);
+                            setFormData({
+                              foc_storeId: r.foc_storeId,
+                              foc_premiumId: r.foc_premiumId,
+                              foc_received: r.foc_received,
+                              foc_used: r.foc_used,
+                              foc_date: r.foc_date.split("T")[0],
+                            });
+                            setSelectedStoreId(r.foc_storeId);
+                          }}
+                        >
+                          แก้ไข
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          className="w-full bg-red-500 hover:bg-red-600 text-white"
+                          onClick={() => handleDelete(r._id)}
+                        >
+                          ลบ
+                        </Button>
                       </div>
                     </div>
                   ))

@@ -96,8 +96,8 @@ export default function SalesFullTablePage() {
         const qty = parseFloat(item.sal_quantity);
         const price = parseFloat(item.sal_unitPrice);
 
-        if (!item.sal_quantity || qty <= 0) {
-          errors.push(`• ${skuName} - จำนวนต้องมากกว่า 0`);
+        if (item.sal_quantity === "" || isNaN(qty) || qty < 0) {
+          errors.push(`• ${skuName} - จำนวนต้องไม่ว่าง และต้อง ≥ 0 (ขายไม่ออกใส่ 0 ได้)`);
         }
 
         if (!item.sal_unitPrice || price <= 0) {

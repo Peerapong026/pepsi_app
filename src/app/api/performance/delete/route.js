@@ -1,0 +1,26 @@
+// app/api/performance/delete/route.js
+import { NextResponse } from "next/server";
+import { connectMongDB } from "../../../../../lib/mongodb"; // ← ปรับ path ตามโปรเจกต์
+import Performance from "../../../../../models/performance";
+
+export async function DELETE(req) {
+  try {
+    await connectMongDB();
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ success: false, message: "Missing id" }, { status: 400 });
+    }
+
+    const deleted = await Performance.findByIdAndDelete(id);
+    if (!deleted) {
+      return NextResponse.json({ success: false, message: "Document not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, data: deleted });
+  } catch (err) {
+    console.error("DELETE /performance/delete error:", err);
+    return NextResponse.json({ success: false, message: err.message }, { status: 500 });
+  }
+}
