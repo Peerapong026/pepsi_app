@@ -1,7 +1,7 @@
 "use client";
 
 // ถ้าคอมโพเนนต์ SaleEdit อยู่ที่ src/app/form/sales/components/sale-edit.jsx
-import SaleEdit from "../../../form/sales/components/sale-edit";
+import SaleEdit from "../../components/sale-edit";
 import { useRouter } from "next/navigation";
 
 export default function SalesEditPage({ params }) {
